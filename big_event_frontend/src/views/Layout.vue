@@ -10,6 +10,51 @@ import {
   CaretBottom
 } from '@element-plus/icons-vue'
 import avatar from '@/assets/default.png'
+import {userInfoService} from "@/api/user.js"
+import useUserInfoStore from "@/stores/userInfo.js";
+import {ElMessage, ElMessageBox} from "element-plus";
+import {useRouter} from "vue-router";
+import {useTokenStore} from "@/stores/token.js";
+
+const tokenStore = useTokenStore();
+const router = useRouter();
+const userInfoStore = useUserInfoStore();
+const getUserInfo = async () => {
+  let result = await userInfoService();
+  userInfoStore.setInfo(result.data)
+}
+getUserInfo()
+
+const handleCommand = (command) => {
+  if (command === 'logout') {
+    ElMessageBox.confirm(
+        '确认退出吗？',
+        '温馨提示',
+        {
+          confirmButtonText: '确认',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+    ).then(async () => {
+      tokenStore.removeToken();
+      userInfoStore.removeInfo()
+
+      router.push('/login');
+
+      ElMessage({
+        type: 'success',
+        message: '退出登陆成功',
+      })
+    }).catch(() => {
+      ElMessage({
+        type: 'info',
+        message: '取消退出登陆',
+      })
+    })
+  } else {
+    router.push('/user/' + command);
+  }
+}
 </script>
 
 <template>
@@ -25,7 +70,7 @@ import avatar from '@/assets/default.png'
           </el-icon>
           <span>文章分类</span>
         </el-menu-item>
-        <el-menu-item  index="/article/manage">
+        <el-menu-item index="/article/manage">
           <el-icon>
             <Promotion/>
           </el-icon>
@@ -63,19 +108,19 @@ import avatar from '@/assets/default.png'
     <el-container>
       <!-- 头部区域 -->
       <el-header>
-        <div>黑马程序员：<strong>东哥</strong></div>
-        <el-dropdown placement="bottom-end">
+        <div>用户：<strong>{{ userInfoStore.info.nickname }}</strong></div>
+        <el-dropdown placement="bottom-end" @command="handleCommand">
                     <span class="el-dropdown__box">
-                        <el-avatar :src="avatar"/>
+                        <el-avatar :src="userInfoStore.info.userPic?userInfoStore.info.userPic:avatar"/>
                         <el-icon>
                             <CaretBottom/>
                         </el-icon>
                     </span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="profile" :icon="User">基本资料</el-dropdown-item>
+              <el-dropdown-item command="info" :icon="User">基本资料</el-dropdown-item>
               <el-dropdown-item command="avatar" :icon="Crop">更换头像</el-dropdown-item>
-              <el-dropdown-item command="password" :icon="EditPen">重置密码</el-dropdown-item>
+              <el-dropdown-item command="resetPassword" :icon="EditPen">重置密码</el-dropdown-item>
               <el-dropdown-item command="logout" :icon="SwitchButton">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>

@@ -17,3 +17,12 @@ export const userLoginService = (loginData) => {
     }
     return request.post('/user/login', params);
 }
+
+export const userInfoService =
+    () => {
+        return request.get('/user/userInfo')
+    }
+export const userInfoUpdateService=
+    (userInfoData)=>{
+        return request.put('/user/update',userInfoData);
+    }

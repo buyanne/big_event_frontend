@@ -26,3 +26,6 @@ export const articleListService =
     (params) => {
         return request.get('/article', {params: params})
     }
+export const articleAddService =(articleData)=>{
+    return request.post('/article',articleData);
+}
